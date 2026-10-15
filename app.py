@@ -14,7 +14,6 @@ DEMOGRAPHIC_CSV = os.path.join(DATA_FOLDER, "demographic_data.csv")
 TASK_CSV = os.path.join(DATA_FOLDER, "task_data.csv")
 EXIT_CSV = os.path.join(DATA_FOLDER, "exit_data.csv")
 
-
 def save_to_csv(data_dict, csv_file):
     # Convert dict to DataFrame with a single row
     df_new = pd.DataFrame([data_dict])
@@ -57,6 +56,10 @@ def main():
 
         # TODO: Create your consent form and a variable called consent_given
 
+        st.markdown("By signing this consent form, you agree that the data you inputted is anonymous and will only be used for demographic and research purposes")
+
+        consent_given = st.checkbox("I agree to the consent terms")
+
         if st.button("Submit Consent"):
             if not consent_given:
                 st.warning("You must agree to the consent terms before proceeding.")
@@ -73,6 +76,10 @@ def main():
 
         with st.form("demographic_form"):
             #TODO: Create the demographic form
+            name = st.text_input(label="What is your name?")
+            age = st.text_input(label="How old are you?")
+            occupation = st.text_input(label="What is your job title or position?")
+            familiarity = st.radio("Are you aware of the subject of this research page?", ("Yes", "No"))
             submitted = st.form_submit_button("Submit Demographics")
             if submitted:
                 data_dict = {
@@ -130,6 +137,10 @@ def main():
 
         with st.form("exit_form"):
             # TODO: likert scale or other way to have an exit questionnaire
+
+            satisfaction = st.slider("From a scale of 1 to 5, how satsified were you using this app?", min_value=1, max_value=5, value=1, step=1)
+            difficulty = st.slider("From a scale of 1 to 5, how difficult did you find using the app?", min_value=1, max_value=5, value=1, step=1)
+            open_feedback = st.text_area("Any additional feedback?")
 
             submitted_exit = st.form_submit_button("Submit Exit Questionnaire")
             if submitted_exit:
