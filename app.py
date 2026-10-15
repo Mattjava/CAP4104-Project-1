@@ -65,11 +65,18 @@ def main():
                 st.warning("You must agree to the consent terms before proceeding.")
             else:
                 # Save the consent acceptance time
-                data_dict = {
-                    "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-                    "consent_given": consent_given
-                }
-                save_to_csv(data_dict, CONSENT_CSV)
+                try:
+                    data_dict = {
+                        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                        "consent_given": consent_given
+                    }
+                    save_to_csv(data_dict, CONSENT_CSV)
+                except Exception:
+                    st.error("Failed to submit consent form. Please try again")
+                else:
+                    st.success("Successfully submitted consent form")
+
+                
 
     with demographics:
         st.header("Demographic Questionnaire")
@@ -82,14 +89,21 @@ def main():
             familiarity = st.radio("Are you aware of the subject of this research page?", ("Yes", "No"))
             submitted = st.form_submit_button("Submit Demographics")
             if submitted:
-                data_dict = {
-                    "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-                    "name": name,
-                    "age": age,
-                    "occupation": occupation,
-                    "familiarity": familiarity
-                }
-                save_to_csv(data_dict, DEMOGRAPHIC_CSV)
+                try:
+                    if name == "" or age == "" or occupation == "":
+                        raise Exception("Incomplete form. Please fill in every answer before submitting")
+                    data_dict = {
+                        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                        "name": name,
+                        "age": age,
+                        "occupation": occupation,
+                        "familiarity": familiarity
+                    }
+                    save_to_csv(data_dict, DEMOGRAPHIC_CSV)
+                except Exception as e:
+                    st.error("Failed to upload form: " + str(e))
+                else:
+                    st.success("Successfully uploaded form")
 
     with tasks:
         st.header("Task Page")
@@ -144,14 +158,18 @@ def main():
 
             submitted_exit = st.form_submit_button("Submit Exit Questionnaire")
             if submitted_exit:
-                data_dict = {
-                    "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-                    "satisfaction": satisfaction,
-                    "difficulty": difficulty,
-                    "open_feedback": open_feedback
-                }
-                save_to_csv(data_dict, EXIT_CSV)
-                st.success("Exit questionnaire data saved.")
+                try:
+                    data_dict = {
+                        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                        "satisfaction": satisfaction,
+                        "difficulty": difficulty,
+                        "open_feedback": open_feedback
+                    }
+                    save_to_csv(data_dict, EXIT_CSV)
+                except Exception:
+                    st.error("Failed to submit questionnaire data. Please try again.")
+                else:
+                    st.success("Exit questionnaire data saved.")
 
     with report:
         st.header("Usability Report - Aggregated Results")
