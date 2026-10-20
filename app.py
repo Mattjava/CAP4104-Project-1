@@ -111,7 +111,7 @@ def main():
         st.write("Please select a task and record your experience completing it.")
 
         # For this template, we assume there's only one task, in project 3, we will have to include the actual tasks
-        selected_task = st.selectbox("Select Task", ["Task 1: Take a photo of your neighborhood"])
+        selected_task = st.selectbox("Select Task", ["Sample Task 1", "Sample Task 2", "Sample Task 3"])
         st.write("Task Description: Perform the example task in our system...")
 
         # Track success, completion time, etc.
