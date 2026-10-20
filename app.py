@@ -111,18 +111,24 @@ def main():
         st.write("Please select a task and record your experience completing it.")
 
         # For this template, we assume there's only one task, in project 3, we will have to include the actual tasks
-        selected_task = st.selectbox("Select Task", ["Task 1: Example Task"])
+        selected_task = st.selectbox("Select Task", ["Task 1: Take a photo of your neighborhood"])
         st.write("Task Description: Perform the example task in our system...")
 
         # Track success, completion time, etc.
         start_button = st.button("Start Task Timer")
         if start_button:
             st.session_state["start_time"] = time.time()
+            st.info("Timer started. Please click on the stop button to record it")
 
         stop_button = st.button("Stop Task Timer")
         if stop_button and "start_time" in st.session_state:
-            duration = time.time() - st.session_state["start_time"]
-            st.session_state["task_duration"] = duration
+            try:
+                duration = time.time() - st.session_state["start_time"]
+                st.session_state["task_duration"] = duration
+            except Exception:
+                st.error("Failed to record task. Please try again")
+            else:
+                st.success("Successfully completed and recorded the task")
 
         success = st.radio("Was the task completed successfully?", ["Yes", "No", "Partial"])
         notes = st.text_area("Observer Notes")
