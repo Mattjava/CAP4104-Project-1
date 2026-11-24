@@ -14,6 +14,28 @@ DEMOGRAPHIC_CSV = os.path.join(DATA_FOLDER, "demographic_data.csv")
 TASK_CSV = os.path.join(DATA_FOLDER, "task_data.csv")
 EXIT_CSV = os.path.join(DATA_FOLDER, "exit_data.csv")
 
+diff_dict = {
+    "Very Difficult": 1,
+    "Difficult": 2,
+    "Neutral": 3,
+    "Easy": 4,
+    "Very Easy": 5
+}
+
+satisfied_dict = {
+    "Not Satisfied": 1,
+    "Barely Satisfied": 2,
+    "Neutral": 3,
+    "Satisfied": 4,
+    "Very Satisfied": 5
+}
+
+TASKS = [
+    "As a fishermen, upload an entry containing details about a recent catch and view it in the history page",
+    "As a researcher, please view the statistics and talk about what you see",
+    "As a researcher, look up the fish you caught and find its wikipedia page through the species page"
+]
+
 def save_to_csv(data_dict, csv_file):
     # Convert dict to DataFrame with a single row
     df_new = pd.DataFrame([data_dict])
@@ -85,12 +107,12 @@ def main():
             #TODO: Create the demographic form
             name = st.text_input(label="What is your name?")
             age = st.text_input(label="How old are you?")
-            occupation = st.text_input(label="What is your job title or position?")
+            occupation = st.text_input(label="What is your job title or position? (Optional)")
             familiarity = st.radio("Are you aware of the subject of this research page?", ("Yes", "No"))
             submitted = st.form_submit_button("Submit Demographics")
             if submitted:
                 try:
-                    if name == "" or age == "" or occupation == "":
+                    if name == "" or age == "":
                         raise Exception("Incomplete form. Please fill in every answer before submitting")
                     data_dict = {
                         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -111,8 +133,8 @@ def main():
         st.write("Please select a task and record your experience completing it.")
 
         # For this template, we assume there's only one task, in project 3, we will have to include the actual tasks
-        selected_task = st.selectbox("Select Task", ["Sample Task 1", "Sample Task 2", "Sample Task 3"])
-        st.write("Task Description: Perform the example task in our system...")
+        selected_task = st.selectbox("Select Task", TASKS)
+        st.write("Task Description: Perform the following task in our app.")
 
         # Track success, completion time, etc.
         start_button = st.button("Start Task Timer")
@@ -128,28 +150,36 @@ def main():
             except Exception:
                 st.error("Failed to record task. Please try again")
             else:
-                st.success("Successfully completed and recorded the task")
+                st.success("Successfully recorded the time")
 
         success = st.radio("Was the task completed successfully?", ["Yes", "No", "Partial"])
         notes = st.text_area("Observer Notes")
 
         if st.button("Save Task Results"):
-            duration_val = st.session_state.get("task_duration", None)
+            try:
+                duration_val = st.session_state.get("task_duration", None)
+                
+                if not duration_val:
+                    raise Exception("Please record the time before submitting.")
 
-            data_dict = {
-                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-                "task_name": selected_task,
-                "success": success,
-                "duration_seconds": duration_val if duration_val else "",
-                "notes": notes
-            }
-            save_to_csv(data_dict, TASK_CSV)
-            
-            # Reset any stored time in session_state if you'd like
-            if "start_time" in st.session_state:
-                del st.session_state["start_time"]
-            if "task_duration" in st.session_state:
-                del st.session_state["task_duration"]
+                data_dict = {
+                    "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                    "task_name": selected_task,
+                    "success": success,
+                    "duration_seconds": duration_val if duration_val else "",
+                    "notes": notes
+                }
+                save_to_csv(data_dict, TASK_CSV)
+                
+                # Reset any stored time in session_state if you'd like
+                if "start_time" in st.session_state:
+                    del st.session_state["start_time"]
+                if "task_duration" in st.session_state:
+                    del st.session_state["task_duration"]
+            except Exception as e:
+                st.error(f'Failed to record task: {e}')
+            else:
+                st.success("Successfully completed and recorded the task")
 
     
     with exit:
@@ -158,8 +188,10 @@ def main():
         with st.form("exit_form"):
             # TODO: likert scale or other way to have an exit questionnaire
 
-            satisfaction = st.slider("From a scale of 1 to 5, how satsified were you using this app?", min_value=1, max_value=5, value=1, step=1)
-            difficulty = st.slider("From a scale of 1 to 5, how difficult did you find using the app?", min_value=1, max_value=5, value=1, step=1)
+            satisfaction = st.select_slider("How satsified are you with the app?", 
+                                            options= ["Not Satisfied", "Barely Satisfied", "Neutral", "Satisfied", "Very Satisfied"],)
+            difficulty = st.select_slider("How difficult did you find using the app?", 
+                                   options=["Very Difficult", "Difficult", "Neutral", "Easy", "Very Easy"],)
             open_feedback = st.text_area("Any additional feedback?")
 
             submitted_exit = st.form_submit_button("Submit Exit Questionnaire")
@@ -167,8 +199,8 @@ def main():
                 try:
                     data_dict = {
                         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-                        "satisfaction": satisfaction,
-                        "difficulty": difficulty,
+                        "satisfaction": satisfied_dict[satisfaction],
+                        "difficulty": diff_dict[difficulty],
                         "open_feedback": open_feedback
                     }
                     save_to_csv(data_dict, EXIT_CSV)
