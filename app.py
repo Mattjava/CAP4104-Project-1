@@ -107,12 +107,15 @@ def main():
             #TODO: Create the demographic form
             name = st.text_input(label="What is your name?")
             age = st.text_input(label="How old are you?")
-            occupation = st.text_input(label="What is your job title or position? (Optional)")
+            occupation = st.radio("What is your title or occupation?", options=["Fisher", "Researcher", "Student", "Other"])
+            other_occupation = st.text_input(label="If other, type in your occupation")
             familiarity = st.radio("Are you aware of the subject of this research page?", ("Yes", "No"))
             submitted = st.form_submit_button("Submit Demographics")
             if submitted:
+                if occupation == "Other":
+                    occupation = other_occupation
                 try:
-                    if name == "" or age == "":
+                    if name == "" or age == "" or occupation == "": 
                         raise Exception("Incomplete form. Please fill in every answer before submitting")
                     data_dict = {
                         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -188,10 +191,17 @@ def main():
         with st.form("exit_form"):
             # TODO: likert scale or other way to have an exit questionnaire
 
+            DEFAULT_OPTIONS = ["Very Difficult", "Difficult", "Neutral", "Easy", "Very Easy"]
+
             satisfaction = st.select_slider("How satsified are you with the app?", 
                                             options= ["Not Satisfied", "Barely Satisfied", "Neutral", "Satisfied", "Very Satisfied"],)
             difficulty = st.select_slider("How difficult did you find using the app?", 
-                                   options=["Very Difficult", "Difficult", "Neutral", "Easy", "Very Easy"],)
+                                   options=DEFAULT_OPTIONS,)
+            usage = st.select_slider("How useful do you think this app is to you?", options=["Very Useful", "Useful", "Sometimes Useful", "Rarely Useful", "Useless"])
+            image_difficulty = st.select_slider("How hard was it to upload files?", options=DEFAULT_OPTIONS)
+
+            bug_rating = st.radio("Did you encounter any bugs, errors, or malfunctions with the program?", options=["Yes", "No"])
+            bug_feedback = st.text_area("If yes, explain")
             open_feedback = st.text_area("Any additional feedback?")
 
             submitted_exit = st.form_submit_button("Submit Exit Questionnaire")
@@ -201,6 +211,10 @@ def main():
                         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
                         "satisfaction": satisfied_dict[satisfaction],
                         "difficulty": diff_dict[difficulty],
+                        "usage": usage,
+                        "image_diffculty": image_difficulty,
+                        "bug_rating": bug_rating,
+                        "bug_feedback": bug_feedback,
                         "open_feedback": open_feedback
                     }
                     save_to_csv(data_dict, EXIT_CSV)
